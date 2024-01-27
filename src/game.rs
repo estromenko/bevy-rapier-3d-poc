@@ -1,4 +1,5 @@
 use bevy::{
+    input::mouse::MouseMotion,
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
 };
@@ -6,6 +7,7 @@ use bevy_rapier3d::prelude::*;
 
 const PLAYER_SPEED: f32 = 10.;
 const LIGHT_COLOR: Color = Color::rgba(0.5, 0.5, 0.17, 1.);
+const CAMERA_ROTATION_SPEED: f32 = 0.01;
 
 #[derive(Component, Reflect)]
 pub struct Player;
@@ -26,6 +28,28 @@ fn handle_movement(mut query: Query<&mut Velocity, With<Player>>, keys: Res<Inpu
     }
     if keys.pressed(KeyCode::D) {
         velocity.linvel.x = PLAYER_SPEED;
+    }
+}
+
+fn handle_mouse_motions(
+    mut mouse_motion_event: EventReader<MouseMotion>,
+    mut query: Query<&mut Transform, With<Player>>,
+) {
+    for event in mouse_motion_event.read() {
+        for mut transform in &mut query {
+            if event.delta.x < 0. {
+                transform.rotate_y(CAMERA_ROTATION_SPEED);
+            }
+            if event.delta.x > 0. {
+                transform.rotate_y(-CAMERA_ROTATION_SPEED);
+            }
+            if event.delta.y < 0. {
+                transform.rotate_local_x(CAMERA_ROTATION_SPEED);
+            }
+            if event.delta.y > 0. {
+                transform.rotate_local_x(-CAMERA_ROTATION_SPEED);
+            }
+        }
     }
 }
 
@@ -89,6 +113,6 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Player>()
             .add_systems(Startup, spawn_game_objects)
-            .add_systems(Update, (handle_movement, cursor_grab));
+            .add_systems(Update, (handle_movement, cursor_grab, handle_mouse_motions));
     }
 }
