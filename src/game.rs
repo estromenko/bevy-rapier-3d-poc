@@ -1,8 +1,5 @@
-use bevy::{
-    input::mouse::MouseMotion,
-    prelude::*,
-    window::{CursorGrabMode, PrimaryWindow},
-};
+use crate::AppState;
+use bevy::{input::mouse::MouseMotion, prelude::*};
 use bevy_rapier3d::prelude::*;
 
 const PLAYER_SPEED: f32 = 10.;
@@ -11,6 +8,12 @@ const CAMERA_ROTATION_SPEED: f32 = 0.01;
 
 #[derive(Component, Reflect)]
 pub struct Player;
+
+#[derive(Component, Reflect)]
+pub struct Walls;
+
+#[derive(Component, Reflect)]
+pub struct Lights;
 
 pub struct GamePlugin;
 
@@ -65,20 +68,6 @@ fn handle_mouse_motions(
     }
 }
 
-fn cursor_grab(mut q_windows: Query<&mut Window, With<PrimaryWindow>>, keys: Res<Input<KeyCode>>) {
-    let mut primary_window = q_windows.single_mut();
-
-    if keys.just_pressed(KeyCode::Escape) {
-        if primary_window.cursor.grab_mode == CursorGrabMode::Locked {
-            primary_window.cursor.grab_mode = CursorGrabMode::None;
-            primary_window.cursor.visible = true;
-        } else {
-            primary_window.cursor.grab_mode = CursorGrabMode::Locked;
-            primary_window.cursor.visible = false;
-        }
-    }
-}
-
 fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         Name::new("Player"),
@@ -103,28 +92,44 @@ fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn((
         Name::new("Walls"),
+        Walls,
         SceneBundle {
             scene: asset_server.load("ROOM.glb#Scene0"),
             ..default()
         },
     ));
 
-    commands.spawn(PointLightBundle {
-        transform: Transform::from_xyz(0.0, 4.0, 0.0),
-        point_light: PointLight {
-            intensity: 1600.0,
-            color: LIGHT_COLOR,
-            shadows_enabled: true,
+    commands.spawn((
+        Lights,
+        PointLightBundle {
+            transform: Transform::from_xyz(0.0, 4.0, 0.0),
+            point_light: PointLight {
+                intensity: 1600.0,
+                color: LIGHT_COLOR,
+                shadows_enabled: true,
+                ..default()
+            },
             ..default()
         },
-        ..default()
-    });
+    ));
 }
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Player>()
-            .add_systems(Startup, spawn_game_objects)
-            .add_systems(Update, (handle_movement, cursor_grab, handle_mouse_motions));
+            .register_type::<Walls>()
+            .add_systems(Startup, spawn_game_objects.run_if(in_state(AppState::Game)))
+            .add_systems(OnEnter(AppState::Game), spawn_game_objects)
+            .add_systems(
+                Update,
+                (handle_movement, handle_mouse_motions).run_if(in_state(AppState::Game)),
+            );
     }
+}
+
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash)]
+pub enum GameState {
+    #[default]
+    Running,
+    Paused,
 }
