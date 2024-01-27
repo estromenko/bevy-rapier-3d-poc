@@ -14,20 +14,32 @@ pub struct Player;
 
 pub struct GamePlugin;
 
-fn handle_movement(mut query: Query<&mut Velocity, With<Player>>, keys: Res<Input<KeyCode>>) {
-    let mut velocity = query.single_mut();
+fn handle_movement(
+    mut query: Query<(&mut Velocity, &Transform), With<Player>>,
+    keys: Res<Input<KeyCode>>,
+) {
+    for (mut velocity, transform) in &mut query {
+        let mut any_direction: Option<Vec3> = None;
 
-    if keys.pressed(KeyCode::W) {
-        velocity.linvel.z = -PLAYER_SPEED;
-    }
-    if keys.pressed(KeyCode::S) {
-        velocity.linvel.z = PLAYER_SPEED;
-    }
-    if keys.pressed(KeyCode::A) {
-        velocity.linvel.x = -PLAYER_SPEED;
-    }
-    if keys.pressed(KeyCode::D) {
-        velocity.linvel.x = PLAYER_SPEED;
+        if keys.pressed(KeyCode::W) {
+            any_direction = Some(transform.forward());
+        }
+        if keys.pressed(KeyCode::S) {
+            any_direction = Some(transform.back());
+        }
+        if keys.pressed(KeyCode::A) {
+            any_direction = Some(transform.left());
+        }
+        if keys.pressed(KeyCode::D) {
+            any_direction = Some(transform.right());
+        }
+
+        if let Some(direction) = any_direction {
+            let mut direction_without_y = direction.clone();
+            direction_without_y.y = 0.;
+            velocity.linvel =
+                direction_without_y.normalize() * Vec3::new(PLAYER_SPEED, 0., PLAYER_SPEED);
+        }
     }
 }
 
