@@ -10,10 +10,7 @@ const CAMERA_ROTATION_SPEED: f32 = 0.01;
 pub struct Player;
 
 #[derive(Component, Reflect)]
-pub struct Walls;
-
-#[derive(Component, Reflect)]
-pub struct Lights;
+pub struct GameObject;
 
 pub struct GamePlugin;
 
@@ -72,6 +69,7 @@ fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         Name::new("Player"),
         Player,
+        GameObject,
         RigidBody::Dynamic,
         GravityScale(0.),
         Collider::cuboid(0.2, 1., 0.2),
@@ -92,7 +90,7 @@ fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn((
         Name::new("Walls"),
-        Walls,
+        GameObject,
         SceneBundle {
             scene: asset_server.load("ROOM.glb#Scene0"),
             ..default()
@@ -100,7 +98,7 @@ fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 
     commands.spawn((
-        Lights,
+        GameObject,
         PointLightBundle {
             transform: Transform::from_xyz(0.0, 4.0, 0.0),
             point_light: PointLight {
@@ -114,12 +112,18 @@ fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
+fn despawn_game_objects(mut commands: Commands, query: Query<Entity, With<GameObject>>) {
+    for entity in &query {
+        commands.entity(entity).despawn_recursive();
+    }
+}
+
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Player>()
-            .register_type::<Walls>()
-            .add_systems(Startup, spawn_game_objects.run_if(in_state(AppState::Game)))
+            .register_type::<GameObject>()
             .add_systems(OnEnter(AppState::Game), spawn_game_objects)
+            .add_systems(OnExit(AppState::Game), despawn_game_objects)
             .add_systems(
                 Update,
                 (handle_movement, handle_mouse_motions).run_if(in_state(AppState::Game)),
@@ -131,5 +135,5 @@ impl Plugin for GamePlugin {
 pub enum GameState {
     #[default]
     Running,
-    Paused,
+    _Paused,
 }
