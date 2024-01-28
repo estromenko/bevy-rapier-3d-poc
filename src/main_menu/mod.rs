@@ -6,6 +6,9 @@ use systems::layout::{despawn_main_menu, spawn_main_menu};
 use crate::AppState;
 
 #[derive(Component)]
+pub struct MainMenuObject;
+
+#[derive(Component)]
 pub struct MainMenu {}
 
 pub struct MainMenuPlugin;
