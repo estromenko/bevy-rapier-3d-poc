@@ -1,27 +1,13 @@
-use crate::main_menu::MainMenu;
+use super::ui_components::*;
 use crate::main_menu::MainMenuObject;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
 pub fn spawn_main_menu(
     mut commands: Commands,
-    _asset_server: Res<AssetServer>,
+    asset_server: Res<AssetServer>,
     mut window_query: Query<&mut Window, With<PrimaryWindow>>,
 ) {
-    commands.spawn((
-        MainMenuObject,
-        NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                ..default()
-            },
-            background_color: Color::PURPLE.into(),
-            ..default()
-        },
-        MainMenu {},
-    ));
-
     let primary_window = window_query.single_mut();
 
     commands.spawn((
@@ -35,6 +21,8 @@ pub fn spawn_main_menu(
             ..default()
         },
     ));
+
+    build_main_menu(&mut commands, &asset_server);
 }
 
 pub fn despawn_main_menu(mut commands: Commands, query: Query<Entity, With<MainMenuObject>>) {
