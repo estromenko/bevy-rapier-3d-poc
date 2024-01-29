@@ -55,10 +55,13 @@ fn handle_mouse_motions(
             if event.delta.x > 0. {
                 transform.rotate_y(-CAMERA_ROTATION_SPEED);
             }
-            if event.delta.y < 0. {
+
+            let y_rotation = transform.forward().y;
+
+            if event.delta.y < 0. && y_rotation + CAMERA_ROTATION_SPEED < 1. {
                 transform.rotate_local_x(CAMERA_ROTATION_SPEED);
             }
-            if event.delta.y > 0. {
+            if event.delta.y > 0. && y_rotation - CAMERA_ROTATION_SPEED > -1. {
                 transform.rotate_local_x(-CAMERA_ROTATION_SPEED);
             }
         }
