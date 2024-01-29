@@ -19,23 +19,23 @@ fn handle_movement(
     keys: Res<Input<KeyCode>>,
 ) {
     for (mut velocity, transform) in &mut query {
-        let mut any_direction: Option<Vec3> = None;
+        let mut any_direction = Vec3::ZERO;
 
         if keys.pressed(KeyCode::W) {
-            any_direction = Some(transform.forward());
+            any_direction += transform.forward();
         }
         if keys.pressed(KeyCode::S) {
-            any_direction = Some(transform.back());
+            any_direction += transform.back();
         }
         if keys.pressed(KeyCode::A) {
-            any_direction = Some(transform.left());
+            any_direction += transform.left();
         }
         if keys.pressed(KeyCode::D) {
-            any_direction = Some(transform.right());
+            any_direction += transform.right();
         }
 
-        if let Some(direction) = any_direction {
-            let mut direction_without_y = direction.clone();
+        if any_direction != Vec3::ZERO {
+            let mut direction_without_y = any_direction.clone();
             direction_without_y.y = 0.;
             velocity.linvel =
                 direction_without_y.normalize() * Vec3::new(PLAYER_SPEED, 0., PLAYER_SPEED);
