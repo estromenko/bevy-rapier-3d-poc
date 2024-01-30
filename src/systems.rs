@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy::window::{CursorGrabMode, PrimaryWindow};
+use bevy::window::PrimaryWindow;
 
 use crate::AppState;
 
@@ -23,13 +23,7 @@ pub fn transition_to_main_menu_state(
             }
         }
 
-        if primary_window.cursor.grab_mode == CursorGrabMode::Locked {
-            primary_window.cursor.grab_mode = CursorGrabMode::None;
-            primary_window.cursor.visible = true;
-        } else {
-            primary_window.cursor.grab_mode = CursorGrabMode::Locked;
-            primary_window.cursor.visible = false;
-        }
+        primary_window.cursor.visible = !primary_window.cursor.visible;
     }
 }
 
