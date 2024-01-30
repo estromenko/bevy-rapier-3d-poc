@@ -19,24 +19,22 @@ fn handle_movement(
     keys: Res<Input<KeyCode>>,
 ) {
     for (mut velocity, transform) in &mut query {
-        let mut any_direction = Vec3::ZERO;
+        let mut changed_velocity = Vec3::ZERO;
 
         if keys.pressed(KeyCode::W) {
-            any_direction += transform.forward();
+            changed_velocity += transform.forward();
         }
         if keys.pressed(KeyCode::S) {
-            any_direction += transform.back();
+            changed_velocity += transform.back();
         }
         if keys.pressed(KeyCode::A) {
-            any_direction += transform.left();
+            changed_velocity += transform.left();
         }
         if keys.pressed(KeyCode::D) {
-            any_direction += transform.right();
+            changed_velocity += transform.right();
         }
 
-        if any_direction != Vec3::ZERO {
-            velocity.linvel = any_direction.normalize() * Vec3::new(PLAYER_SPEED, 1., PLAYER_SPEED);
-        }
+        velocity.linvel = changed_velocity * Vec3::new(PLAYER_SPEED, 1., PLAYER_SPEED);
     }
 }
 
@@ -77,14 +75,12 @@ fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
         GravityScale(PLAYER_SPEED * 4.),
         Restitution::coefficient(0.),
         Damping {
-            linear_damping: PLAYER_SPEED * 4.,
             angular_damping: 1000000.,
             ..default()
         },
         Camera3dBundle {
             transform: Transform {
                 translation: Vec3::new(0., 20., 0.),
-                scale: Vec3::new(1., 1., 0.3),
                 ..default()
             },
             ..default()
