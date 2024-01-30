@@ -1,11 +1,13 @@
 mod game;
 mod gltf_auto_colliders;
 mod main_menu;
+mod player;
 mod systems;
 
 use game::GamePlugin;
 use gltf_auto_colliders::GltfAutoCollidersPlugin;
 use main_menu::MainMenuPlugin;
+use player::PlayerPlugin;
 
 use crate::systems::SystemsPlugin;
 use bevy::{prelude::*, window::WindowMode};
@@ -30,6 +32,7 @@ fn main() {
             RapierPhysicsPlugin::<NoUserData>::default(),
             #[cfg(debug_assertions)]
             RapierDebugRenderPlugin::default(),
+            PlayerPlugin,
             GamePlugin,
             MainMenuPlugin,
             SystemsPlugin,
