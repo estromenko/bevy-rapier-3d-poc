@@ -1,6 +1,7 @@
 mod game;
 mod gltf_auto_colliders;
 mod main_menu;
+mod pause;
 mod player;
 
 use game::GamePlugin;

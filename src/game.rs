@@ -1,4 +1,9 @@
-use crate::{gltf_auto_colliders::GltfAsset, player::spawn_player, AppState};
+use crate::{
+    gltf_auto_colliders::GltfAsset,
+    pause::{despawn_pause, spawn_pause},
+    player::spawn_player,
+    AppState,
+};
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_rapier3d::prelude::RapierConfiguration;
 
@@ -79,6 +84,8 @@ impl Plugin for GamePlugin {
         app.register_type::<GameObject>()
             .add_systems(Update, handle_pause)
             .add_systems(OnEnter(AppState::MainMenu), despawn_game_objects)
+            .add_systems(OnEnter(AppState::Pause), spawn_pause)
+            .add_systems(OnExit(AppState::Pause), despawn_pause)
             .add_systems(OnExit(AppState::MainMenu), spawn_game_objects);
     }
 }
