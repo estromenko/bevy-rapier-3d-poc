@@ -1,8 +1,10 @@
 mod game;
+mod gltf_auto_colliders;
 mod main_menu;
 mod systems;
 
 use game::GamePlugin;
+use gltf_auto_colliders::GltfAutoCollidersPlugin;
 use main_menu::MainMenuPlugin;
 
 use crate::systems::SystemsPlugin;
@@ -31,6 +33,7 @@ fn main() {
             GamePlugin,
             MainMenuPlugin,
             SystemsPlugin,
+            GltfAutoCollidersPlugin,
         ))
         .run();
 }

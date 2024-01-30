@@ -1,4 +1,4 @@
-use crate::AppState;
+use crate::{gltf_auto_colliders::GltfAsset, AppState};
 use bevy::{input::mouse::MouseMotion, prelude::*};
 use bevy_rapier3d::prelude::*;
 
@@ -35,10 +35,7 @@ fn handle_movement(
         }
 
         if any_direction != Vec3::ZERO {
-            let mut direction_without_y = any_direction.clone();
-            direction_without_y.y = 0.;
-            velocity.linvel =
-                direction_without_y.normalize() * Vec3::new(PLAYER_SPEED, 0., PLAYER_SPEED);
+            velocity.linvel = any_direction.normalize() * Vec3::new(PLAYER_SPEED, 1., PLAYER_SPEED);
         }
     }
 }
@@ -74,16 +71,19 @@ fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
         Player,
         GameObject,
         RigidBody::Dynamic,
-        GravityScale(0.),
-        Collider::cuboid(0.2, 1., 0.2),
+        Collider::cuboid(1., 4., 1.),
         Velocity::zero(),
+        Ccd::enabled(),
+        GravityScale(PLAYER_SPEED * 4.),
+        Restitution::coefficient(0.),
         Damping {
             linear_damping: PLAYER_SPEED * 4.,
+            angular_damping: 1000000.,
             ..default()
         },
         Camera3dBundle {
             transform: Transform {
-                translation: Vec3::new(0., 2., 0.),
+                translation: Vec3::new(0., 20., 0.),
                 scale: Vec3::new(1., 1., 0.3),
                 ..default()
             },
@@ -91,21 +91,14 @@ fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     ));
 
-    commands.spawn((
-        Name::new("Walls"),
-        GameObject,
-        SceneBundle {
-            scene: asset_server.load("ROOM.glb#Scene0"),
-            ..default()
-        },
-    ));
+    commands.insert_resource(GltfAsset(asset_server.load("room.glb")));
 
     commands.spawn((
         GameObject,
         PointLightBundle {
-            transform: Transform::from_xyz(0.0, 4.0, 0.0),
+            transform: Transform::from_xyz(0.0, 9.0, 0.0),
             point_light: PointLight {
-                intensity: 1600.0,
+                intensity: 4000.0,
                 color: LIGHT_COLOR,
                 shadows_enabled: true,
                 ..default()
