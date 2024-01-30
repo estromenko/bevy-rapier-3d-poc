@@ -3,6 +3,8 @@ use std::f32::INFINITY;
 use bevy::{input::mouse::MouseMotion, prelude::*};
 use bevy_rapier3d::prelude::*;
 
+use crate::AppState;
+
 const PLAYER_SPEED: f32 = 10.;
 const CAMERA_ROTATION_SPEED: f32 = 0.01;
 
@@ -71,6 +73,7 @@ pub fn spawn_player(commands: &mut Commands) -> Entity {
             Ccd::enabled(),
             GravityScale(PLAYER_SPEED * 4.),
             Restitution::coefficient(0.),
+            Friction::coefficient(1.),
             Damping {
                 angular_damping: INFINITY,
                 ..default()
@@ -88,7 +91,12 @@ pub fn spawn_player(commands: &mut Commands) -> Entity {
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<Player>()
-            .add_systems(Update, (handle_movement, handle_mouse_motions));
+        app.register_type::<Player>().add_systems(
+            Update,
+            (
+                handle_movement.run_if(in_state(AppState::Game)),
+                handle_mouse_motions.run_if(in_state(AppState::Game)),
+            ),
+        );
     }
 }

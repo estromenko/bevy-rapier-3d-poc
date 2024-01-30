@@ -35,6 +35,7 @@ fn add_colliders_for_gltf(
                             Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
                                 .unwrap(),
                             Restitution::coefficient(0.),
+                            Friction::coefficient(1.),
                         ));
                     }
                 }
