@@ -7,6 +7,7 @@ mod player;
 use game::GamePlugin;
 use gltf_auto_colliders::GltfAutoCollidersPlugin;
 use main_menu::MainMenuPlugin;
+use pause::PausePlugin;
 use player::PlayerPlugin;
 
 use bevy::{prelude::*, window::WindowMode};
@@ -33,6 +34,7 @@ fn main() {
             RapierDebugRenderPlugin::default(),
             PlayerPlugin,
             GamePlugin,
+            PausePlugin,
             MainMenuPlugin,
             GltfAutoCollidersPlugin,
         ))
