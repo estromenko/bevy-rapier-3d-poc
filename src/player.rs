@@ -4,7 +4,7 @@ use bevy_rapier3d::prelude::*;
 use crate::AppState;
 
 const PLAYER_SPEED: f32 = 10.;
-const CAMERA_ROTATION_SPEED: f32 = 0.01;
+const CAMERA_ROTATION_SPEED: f32 = 0.002;
 
 #[derive(Component, Reflect)]
 pub struct Player;
@@ -42,20 +42,16 @@ fn handle_mouse_motions(
 ) {
     for event in mouse_motion_event.read() {
         for mut transform in &mut query {
-            if event.delta.x < 0. {
-                transform.rotate_y(CAMERA_ROTATION_SPEED);
-            }
-            if event.delta.x > 0. {
-                transform.rotate_y(-CAMERA_ROTATION_SPEED);
+            if event.delta.x != 0. {
+                transform.rotate_y(-event.delta.x * CAMERA_ROTATION_SPEED);
             }
 
             let y_rotation = transform.forward().y;
+            let in_top_vertial_range = y_rotation + CAMERA_ROTATION_SPEED < 1.;
+            let in_bottom_vertial_range = y_rotation - CAMERA_ROTATION_SPEED > -1.;
 
-            if event.delta.y < 0. && y_rotation + CAMERA_ROTATION_SPEED < 1. {
-                transform.rotate_local_x(CAMERA_ROTATION_SPEED);
-            }
-            if event.delta.y > 0. && y_rotation - CAMERA_ROTATION_SPEED > -1. {
-                transform.rotate_local_x(-CAMERA_ROTATION_SPEED);
+            if event.delta.y != 0. && (in_top_vertial_range || in_bottom_vertial_range) {
+                transform.rotate_local_x(-event.delta.y * CAMERA_ROTATION_SPEED);
             }
         }
     }
