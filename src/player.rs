@@ -12,11 +12,11 @@ pub struct Player;
 pub struct PlayerPlugin;
 
 fn handle_movement(
-    mut query: Query<(&mut Velocity, &Transform), With<Player>>,
+    mut query: Query<(&Transform, &mut KinematicCharacterController), With<Player>>,
     keys: Res<Input<KeyCode>>,
 ) {
-    for (mut velocity, transform) in &mut query {
-        let mut changed_velocity = Vec3::ZERO;
+    for (transform, mut controller) in &mut query {
+        let mut changed_velocity = controller.translation.unwrap_or(Vec3::ZERO);
 
         if keys.pressed(KeyCode::W) {
             changed_velocity += transform.forward();
@@ -31,7 +31,8 @@ fn handle_movement(
             changed_velocity += transform.right();
         }
 
-        velocity.linvel = changed_velocity * Vec3::new(PLAYER_SPEED, 1., PLAYER_SPEED);
+        changed_velocity *= Vec3::new(PLAYER_SPEED, 1., PLAYER_SPEED);
+        controller.translation = Some(changed_velocity.normalize());
     }
 }
 
@@ -60,17 +61,26 @@ fn handle_mouse_motions(
     }
 }
 
+fn handle_manual_gravity(
+    mut query: Query<&mut KinematicCharacterController, With<Player>>,
+    rapier_config: Res<RapierConfiguration>,
+) {
+    for mut controller in &mut query {
+        let mut translation = controller.translation.unwrap_or(Vec3::ZERO);
+        translation.y = -rapier_config.gravity.y.abs();
+        controller.translation = Some(translation);
+    }
+}
+
 pub fn spawn_player(commands: &mut Commands) -> Entity {
     commands
         .spawn((
             Name::new("Player"),
             Player,
-            RigidBody::Dynamic,
+            RigidBody::KinematicVelocityBased,
+            KinematicCharacterController::default(),
             Collider::cuboid(1., 4., 1.),
             Velocity::zero(),
-            Ccd::enabled(),
-            GravityScale(PLAYER_SPEED * 4.),
-            LockedAxes::ROTATION_LOCKED,
             Camera3dBundle {
                 transform: Transform {
                     translation: Vec3::new(0., 20., 0.),
@@ -89,6 +99,7 @@ impl Plugin for PlayerPlugin {
             (
                 handle_movement.run_if(in_state(AppState::Game)),
                 handle_mouse_motions.run_if(in_state(AppState::Game)),
+                handle_manual_gravity.run_if(in_state(AppState::Game)),
             ),
         );
     }
