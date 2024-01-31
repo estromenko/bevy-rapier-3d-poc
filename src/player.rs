@@ -1,5 +1,3 @@
-use std::f32::INFINITY;
-
 use bevy::{input::mouse::MouseMotion, prelude::*};
 use bevy_rapier3d::prelude::*;
 
@@ -72,12 +70,7 @@ pub fn spawn_player(commands: &mut Commands) -> Entity {
             Velocity::zero(),
             Ccd::enabled(),
             GravityScale(PLAYER_SPEED * 4.),
-            Restitution::coefficient(0.),
-            Friction::coefficient(1.),
-            Damping {
-                angular_damping: INFINITY,
-                ..default()
-            },
+            LockedAxes::ROTATION_LOCKED,
             Camera3dBundle {
                 transform: Transform {
                     translation: Vec3::new(0., 20., 0.),

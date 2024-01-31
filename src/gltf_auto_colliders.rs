@@ -31,12 +31,10 @@ fn add_colliders_for_gltf(
                         let handle_mesh = primitive.mesh.clone();
                         let mesh = assets_mesh.get(handle_mesh).unwrap();
 
-                        commands.spawn((
+                        commands.spawn(
                             Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
                                 .unwrap(),
-                            Restitution::coefficient(0.),
-                            Friction::coefficient(1.),
-                        ));
+                        );
                     }
                 }
             }
