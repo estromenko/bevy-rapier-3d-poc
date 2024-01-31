@@ -9,11 +9,7 @@ pub struct GameObject;
 
 pub struct GamePlugin;
 
-fn spawn_game_objects(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut window_query: Query<&mut Window, With<PrimaryWindow>>,
-) {
+fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(GltfAsset(asset_server.load("room.glb")));
 
     commands.spawn((
@@ -33,9 +29,6 @@ fn spawn_game_objects(
     let entity = spawn_player(&mut commands);
     commands.entity(entity).insert(GameObject);
 
-    let mut primary_window = window_query.single_mut();
-    primary_window.cursor.visible = false;
-
     commands.insert_resource(RapierConfiguration::default());
 }
 
@@ -52,10 +45,16 @@ fn despawn_game_objects(
     primary_window.cursor.visible = true;
 }
 
+fn hide_cursor(mut window_query: Query<&mut Window, With<PrimaryWindow>>) {
+    let mut primary_window = window_query.single_mut();
+    primary_window.cursor.visible = false;
+}
+
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<GameObject>()
             .add_systems(OnEnter(AppState::MainMenu), despawn_game_objects)
-            .add_systems(OnExit(AppState::MainMenu), spawn_game_objects);
+            .add_systems(OnExit(AppState::MainMenu), spawn_game_objects)
+            .add_systems(OnEnter(AppState::Game), hide_cursor);
     }
 }
