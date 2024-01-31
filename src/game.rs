@@ -1,3 +1,4 @@
+use crate::player::spawn_player_camera;
 use crate::{gltf_auto_colliders::GltfAsset, player::spawn_player, AppState};
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_rapier3d::prelude::RapierConfiguration;
@@ -27,7 +28,9 @@ fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 
     let entity = spawn_player(&mut commands);
+    let player_camera = spawn_player_camera(&mut commands);
     commands.entity(entity).insert(GameObject);
+    commands.entity(player_camera).insert(GameObject);
 
     commands.insert_resource(RapierConfiguration::default());
 }

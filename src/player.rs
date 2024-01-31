@@ -9,6 +9,9 @@ const CAMERA_ROTATION_SPEED: f32 = 0.001;
 #[derive(Component, Reflect)]
 pub struct Player;
 
+#[derive(Component)]
+pub struct PlayerCamera;
+
 pub struct PlayerPlugin;
 
 fn handle_movement(
@@ -38,7 +41,7 @@ fn handle_movement(
 
 fn handle_mouse_motions(
     mut mouse_motion_event: EventReader<MouseMotion>,
-    mut query: Query<&mut Transform, With<Player>>,
+    mut query: Query<&mut Transform, With<PlayerCamera>>,
 ) {
     for event in mouse_motion_event.read() {
         for mut transform in &mut query {
@@ -72,12 +75,23 @@ pub fn spawn_player(commands: &mut Commands) -> Entity {
             Name::new("Player"),
             Player,
             RigidBody::KinematicVelocityBased,
-            KinematicCharacterController::default(),
+            KinematicCharacterController {
+                translation: Some(Vec3::new(0., 20., 0.)),
+                ..default()
+            },
             Collider::cuboid(1., 4., 1.),
             Velocity::zero(),
+        ))
+        .id()
+}
+
+pub fn spawn_player_camera(commands: &mut Commands) -> Entity {
+    commands
+        .spawn((
+            PlayerCamera,
             Camera3dBundle {
                 transform: Transform {
-                    translation: Vec3::new(0., 20., 0.),
+                    translation: Vec3::new(0., 10., 0.),
                     ..default()
                 },
                 ..default()
