@@ -77,7 +77,10 @@ fn handle_pause(
 impl Plugin for PausePlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<PauseObject>()
-            .add_systems(Update, handle_pause)
+            .add_systems(
+                Update,
+                handle_pause.run_if(in_state(AppState::Game).or_else(in_state(AppState::Pause))),
+            )
             .add_systems(OnEnter(AppState::Pause), spawn_pause)
             .add_systems(OnExit(AppState::Pause), despawn_pause);
     }
