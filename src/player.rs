@@ -3,7 +3,7 @@ use bevy_rapier3d::prelude::*;
 
 use crate::AppState;
 
-const PLAYER_SPEED: f32 = 1.;
+const PLAYER_SPEED: f32 = 20.;
 const CAMERA_ROTATION_SPEED: f32 = 0.001;
 
 #[derive(Component, Reflect)]
@@ -12,33 +12,36 @@ pub struct Player;
 pub struct PlayerPlugin;
 
 fn handle_movement(
-    mut query: Query<(&Transform, &mut KinematicCharacterController), With<Player>>,
+    mut player_query: Query<(&mut Velocity, &Children), With<Player>>,
+    camera_query: Query<&Transform, With<Camera>>,
     keys: Res<Input<KeyCode>>,
 ) {
-    for (transform, mut controller) in &mut query {
-        let mut changed_velocity = controller.translation.unwrap_or(Vec3::ZERO);
+    for (mut velocity, children) in &mut player_query {
+        let camera = children.get(0).unwrap();
+        let transform = camera_query.get(*camera).unwrap();
+
+        let mut rotation = Vec3::ZERO;
 
         if keys.pressed(KeyCode::W) {
-            changed_velocity += transform.forward();
-        }
-        if keys.pressed(KeyCode::S) {
-            changed_velocity += transform.back();
+            rotation += transform.forward();
+        } else if keys.pressed(KeyCode::S) {
+            rotation += transform.back();
         }
         if keys.pressed(KeyCode::A) {
-            changed_velocity += transform.left();
-        }
-        if keys.pressed(KeyCode::D) {
-            changed_velocity += transform.right();
+            rotation += transform.left();
+        } else if keys.pressed(KeyCode::D) {
+            rotation += transform.right();
         }
 
-        changed_velocity *= Vec3::new(PLAYER_SPEED, 1., PLAYER_SPEED);
-        controller.translation = Some(changed_velocity.normalize());
+        if rotation != Vec3::ZERO {
+            velocity.linvel = rotation * Vec3::new(PLAYER_SPEED, 0., PLAYER_SPEED);
+        }
     }
 }
 
 fn handle_mouse_motions(
     mut mouse_motion_event: EventReader<MouseMotion>,
-    mut query: Query<&mut Transform, With<Player>>,
+    mut query: Query<&mut Transform, With<Camera>>,
 ) {
     for event in mouse_motion_event.read() {
         for mut transform in &mut query {
@@ -55,34 +58,27 @@ fn handle_mouse_motions(
     }
 }
 
-fn handle_manual_gravity(
-    mut query: Query<&mut KinematicCharacterController, With<Player>>,
-    rapier_config: Res<RapierConfiguration>,
-) {
-    for mut controller in &mut query {
-        let mut translation = controller.translation.unwrap_or(Vec3::ZERO);
-        translation.y = -rapier_config.gravity.y.abs();
-        controller.translation = Some(translation);
-    }
-}
-
 pub fn spawn_player(commands: &mut Commands) -> Entity {
     commands
         .spawn((
             Name::new("Player"),
             Player,
-            RigidBody::KinematicVelocityBased,
-            KinematicCharacterController::default(),
-            Collider::cuboid(1., 4., 1.),
-            Velocity::zero(),
-            Camera3dBundle {
-                transform: Transform {
-                    translation: Vec3::new(0., 20., 0.),
-                    ..default()
-                },
+            RigidBody::Dynamic,
+            LockedAxes::ROTATION_LOCKED,
+            Damping {
+                linear_damping: 10.,
                 ..default()
             },
+            Collider::cuboid(1., 4., 1.),
+            Velocity::zero(),
+            TransformBundle::from_transform(Transform::from_xyz(0., 6., 0.)),
         ))
+        .with_children(|parent| {
+            parent.spawn(Camera3dBundle {
+                transform: Transform::from_xyz(0., 6., 0.),
+                ..default()
+            });
+        })
         .id()
 }
 
@@ -93,7 +89,6 @@ impl Plugin for PlayerPlugin {
             (
                 handle_movement.run_if(in_state(AppState::Game)),
                 handle_mouse_motions.run_if(in_state(AppState::Game)),
-                handle_manual_gravity.run_if(in_state(AppState::Game)),
             ),
         );
     }
