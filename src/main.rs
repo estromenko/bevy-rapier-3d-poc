@@ -1,8 +1,10 @@
+mod config;
 mod game;
 mod main_menu;
 mod pause;
 mod player;
 
+use config::ConfigPlugin;
 use game::GamePlugin;
 use main_menu::MainMenuPlugin;
 use pause::PausePlugin;
@@ -34,6 +36,7 @@ fn main() {
             GamePlugin,
             PausePlugin,
             MainMenuPlugin,
+            ConfigPlugin,
         ))
         .run();
 }

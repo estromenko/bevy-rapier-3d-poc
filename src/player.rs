@@ -1,10 +1,7 @@
 use bevy::{input::mouse::MouseMotion, prelude::*};
 use bevy_rapier3d::prelude::*;
 
-use crate::AppState;
-
-const PLAYER_SPEED: f32 = 20.;
-const CAMERA_ROTATION_SPEED: f32 = 0.001;
+use crate::{config::Config, AppState};
 
 #[derive(Component, Reflect)]
 pub struct Player;
@@ -15,6 +12,7 @@ fn handle_movement(
     mut player_query: Query<(&mut Velocity, &Children), With<Player>>,
     camera_query: Query<&Transform, With<Camera>>,
     keys: Res<Input<KeyCode>>,
+    config: Res<Config>,
 ) {
     for (mut velocity, children) in &mut player_query {
         let camera = children.get(0).unwrap();
@@ -34,7 +32,8 @@ fn handle_movement(
         }
 
         if rotation != Vec3::ZERO {
-            velocity.linvel = rotation * Vec3::new(PLAYER_SPEED, 0., PLAYER_SPEED);
+            velocity.linvel =
+                rotation * Vec3::new(config.movement_speed, 0., config.movement_speed);
         }
     }
 }
@@ -42,17 +41,19 @@ fn handle_movement(
 fn handle_mouse_motions(
     mut mouse_motion_event: EventReader<MouseMotion>,
     mut query: Query<&mut Transform, With<Camera>>,
+    config: Res<Config>,
 ) {
     for event in mouse_motion_event.read() {
         for mut transform in &mut query {
-            transform.rotate_y(-event.delta.x * CAMERA_ROTATION_SPEED);
+            transform.rotate_y(-event.delta.x * config.mouse_sensibility);
 
             let y_rotation = transform.forward().y;
-            let in_top_vertial_range = y_rotation - event.delta.y * CAMERA_ROTATION_SPEED < 0.8;
-            let in_bottom_vertial_range = y_rotation - event.delta.y * CAMERA_ROTATION_SPEED > -0.8;
+            let in_top_vertial_range = y_rotation - event.delta.y * config.mouse_sensibility < 0.8;
+            let in_bottom_vertial_range =
+                y_rotation - event.delta.y * config.mouse_sensibility > -0.8;
 
             if in_top_vertial_range && in_bottom_vertial_range {
-                transform.rotate_local_x(-event.delta.y * CAMERA_ROTATION_SPEED);
+                transform.rotate_local_x(-event.delta.y * config.mouse_sensibility);
             }
         }
     }
