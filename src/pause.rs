@@ -153,6 +153,7 @@ fn handle_resume_button_interaction(
         (Changed<Interaction>, With<ResumeButton>),
     >,
     mut next_app_state: ResMut<NextState<AppState>>,
+    mut rapier_config: ResMut<RapierConfiguration>,
 ) {
     for (interaction, mut background_color) in &mut query {
         match *interaction {
@@ -161,6 +162,7 @@ fn handle_resume_button_interaction(
             }
             Interaction::Pressed => {
                 next_app_state.set(AppState::Game);
+                rapier_config.physics_pipeline_active = true;
             }
             Interaction::None => {
                 *background_color = Color::rgb(0.15, 0.15, 0.15).into();
