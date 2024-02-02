@@ -1,6 +1,6 @@
-use crate::{gltf_auto_colliders::GltfAsset, player::spawn_player, AppState};
+use crate::{player::spawn_player, AppState};
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_rapier3d::prelude::RapierConfiguration;
+use bevy_rapier3d::prelude::{AsyncSceneCollider, RapierConfiguration};
 
 const LIGHT_COLOR: Color = Color::rgba(0.5, 0.5, 0.17, 1.);
 
@@ -10,7 +10,15 @@ pub struct GameObject;
 pub struct GamePlugin;
 
 fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.insert_resource(GltfAsset(asset_server.load("room.glb")));
+    commands.spawn((
+        Name::new("Room"),
+        AsyncSceneCollider::default(),
+        SceneBundle {
+            scene: asset_server.load("room.glb#Scene0"),
+            transform: Transform::default(),
+            ..default()
+        },
+    ));
 
     commands.spawn((
         GameObject,

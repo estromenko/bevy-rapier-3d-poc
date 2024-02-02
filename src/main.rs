@@ -1,11 +1,9 @@
 mod game;
-mod gltf_auto_colliders;
 mod main_menu;
 mod pause;
 mod player;
 
 use game::GamePlugin;
-use gltf_auto_colliders::GltfAutoCollidersPlugin;
 use main_menu::MainMenuPlugin;
 use pause::PausePlugin;
 use player::PlayerPlugin;
@@ -36,7 +34,6 @@ fn main() {
             GamePlugin,
             PausePlugin,
             MainMenuPlugin,
-            GltfAutoCollidersPlugin,
         ))
         .run();
 }
