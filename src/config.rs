@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+#[cfg(debug_assertions)]
 use bevy_inspector_egui::quick::ResourceInspectorPlugin;
 
 #[derive(Resource, Reflect)]
@@ -20,8 +21,9 @@ pub struct ConfigPlugin;
 
 impl Plugin for ConfigPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<Config>()
-            .init_resource::<Config>()
-            .add_plugins(ResourceInspectorPlugin::<Config>::default());
+        app.register_type::<Config>().init_resource::<Config>();
+
+        #[cfg(debug_assertions)]
+        app.add_plugins(ResourceInspectorPlugin::<Config>::default());
     }
 }
