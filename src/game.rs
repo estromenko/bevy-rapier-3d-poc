@@ -12,6 +12,7 @@ pub struct GamePlugin;
 fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         Name::new("Room"),
+        GameObject,
         AsyncSceneCollider::default(),
         SceneBundle {
             scene: asset_server.load("room.glb#Scene0"),
