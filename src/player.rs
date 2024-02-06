@@ -76,7 +76,7 @@ pub fn spawn_player(commands: &mut Commands) -> Entity {
         ))
         .with_children(|parent| {
             parent.spawn(Camera3dBundle {
-                transform: Transform::from_xyz(0., 6., 0.),
+                transform: Transform::from_xyz(0., 4., 0.),
                 ..default()
             });
         })

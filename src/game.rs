@@ -1,6 +1,6 @@
 use crate::{player::spawn_player, AppState};
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_rapier3d::prelude::{AsyncSceneCollider, RapierConfiguration};
+use bevy_rapier3d::prelude::*;
 
 const LIGHT_COLOR: Color = Color::rgba(0.5, 0.5, 0.17, 1.);
 
@@ -31,6 +31,19 @@ fn spawn_game_objects(mut commands: Commands, asset_server: Res<AssetServer>) {
                 shadows_enabled: true,
                 ..default()
             },
+            ..default()
+        },
+    ));
+
+    commands.spawn((
+        Name::new("Squirrel"),
+        RigidBody::Dynamic,
+        GameObject,
+        Collider::capsule(Vec3::ZERO, Vec3::new(0., 1., 0.), 1.),
+        Restitution::coefficient(2.),
+        SceneBundle {
+            scene: asset_server.load("squirrel.glb#Scene0"),
+            transform: Transform::from_xyz(0., 5., 0.),
             ..default()
         },
     ));
